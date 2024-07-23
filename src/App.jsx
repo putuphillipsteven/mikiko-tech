@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, get, update } from 'firebase/database';
+import { getDatabase, ref, onValue, update } from 'firebase/database';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { Line } from 'react-chartjs-2';
 import {
@@ -38,24 +38,22 @@ function App() {
 	const [data, setData] = useState([]);
 	const [dataMCU, setDataMCU] = useState({});
 
-	const getDataMCU = async () => {
-		try {
-			const controlRef = ref(database, 'MCU/1Xvvxx57qAUFtrpJucCThDjZbdB2/control');
-			const snapshot = await get(controlRef);
+	// Fetch and listen for real-time updates from Firebase for MCU control
+	const listenForControlUpdates = () => {
+		const controlRef = ref(database, 'MCU/1Xvvxx57qAUFtrpJucCThDjZbdB2/control');
+		onValue(controlRef, (snapshot) => {
 			if (snapshot.exists()) {
 				setDataMCU(snapshot.val());
 			} else {
 				console.log('No data available');
 			}
-		} catch (error) {
-			console.error('Error fetching data:', error);
-		}
+		});
 	};
 
-	const getData = async () => {
-		try {
-			const dbRef = ref(database, 'PohonSensor/1Xvvxx57qAUFtrpJucCThDjZbdB2/data');
-			const snapshot = await get(dbRef);
+	// Fetch and listen for real-time updates from Firebase for sensor data
+	const listenForDataUpdates = () => {
+		const dbRef = ref(database, 'PohonSensor/1Xvvxx57qAUFtrpJucCThDjZbdB2/data');
+		onValue(dbRef, (snapshot) => {
 			if (snapshot.exists()) {
 				const readingsData = snapshot.val();
 				const formattedData = Object.keys(readingsData).map((key) => ({
@@ -64,15 +62,12 @@ function App() {
 				}));
 
 				// Sort data by timestamp and get the 10 newest entries
-				const sortedData = formattedData.sort((a, b) => b.timestamp - a.timestamp).slice(0, 10);
+				const sortedData = formattedData.sort((a, b) => a.timestamp - b.timestamp).slice(0, 10);
 				setData(sortedData);
-				// console.log('Formatted Data:', sortedData);
 			} else {
 				console.log('No data available');
 			}
-		} catch (error) {
-			console.error('Error fetching data:', error);
-		}
+		});
 	};
 
 	const toggleControl = async (control) => {
@@ -92,10 +87,8 @@ function App() {
 		signInAnonymously(auth)
 			.then(() => {
 				console.log('Signed in anonymously');
-				getDataMCU();
-				getData();
-				const interval = setInterval(getData, 1000);
-				return () => clearInterval(interval);
+				listenForControlUpdates();
+				listenForDataUpdates();
 			})
 			.catch((error) => {
 				console.error('Sign-in error:', error);
@@ -141,6 +134,19 @@ function App() {
 		],
 	};
 
+	const chartDataSoilTemperature = {
+		labels: data.map((reading) => formatTimestampForChart(reading.timestamp)),
+		datasets: [
+			{
+				label: 'Soil Temperature',
+				data: data.map((reading) => reading.soiltemp),
+				borderColor: 'rgba(255, 99, 132, 1)',
+				backgroundColor: 'rgba(255, 99, 132, 0.2)',
+				fill: false,
+			},
+		],
+	};
+
 	const chartDataHumidity = {
 		labels: data.map((reading) => formatTimestampForChart(reading.timestamp)),
 		datasets: [
@@ -162,19 +168,6 @@ function App() {
 				data: data.map((reading) => reading.soilhum),
 				borderColor: 'rgba(255, 159, 64, 1)',
 				backgroundColor: 'rgba(255, 159, 64, 0.2)',
-				fill: false,
-			},
-		],
-	};
-
-	const chartDataSoilTemperature = {
-		labels: data.map((reading) => formatTimestampForChart(reading.timestamp)),
-		datasets: [
-			{
-				label: 'Soil Temperature',
-				data: data.map((reading) => reading.soiltemp),
-				borderColor: 'rgba(255, 99, 132, 1)',
-				backgroundColor: 'rgba(255, 99, 132, 0.2)',
 				fill: false,
 			},
 		],
@@ -241,12 +234,6 @@ function App() {
 				<div className='control-panel'>
 					<h2>Control Panel</h2>
 					<div className='button-control'>
-						<button onClick={() => toggleControl('driptape')}>
-							Drip Tape: {dataMCU.driptape === 0 ? 'Off' : 'On'}
-						</button>
-						<button onClick={() => toggleControl('fogger')}>
-							Fogger: {dataMCU.fogger === 0 ? 'Off' : 'On'}
-						</button>
 						<button onClick={() => toggleControl('pump')}>
 							Pump: {dataMCU.pump === 0 ? 'Off' : 'On'}
 						</button>
@@ -259,11 +246,17 @@ function App() {
 						<button onClick={() => toggleControl('sprinkler3')}>
 							Sprinkler 3: {dataMCU.sprinkler3 === 0 ? 'Off' : 'On'}
 						</button>
+						<button onClick={() => toggleControl('driptape')}>
+							Drip Tape: {dataMCU.driptape === 0 ? 'Off' : 'On'}
+						</button>
+						<button onClick={() => toggleControl('fogger')}>
+							Fogger: {dataMCU.fogger === 0 ? 'Off' : 'On'}
+						</button>
 					</div>
 					<table>
 						<thead>
 							<tr>
-								<th>Timestamp</th>
+								<th>Date</th>
 								<th>Humidity</th>
 								<th>Rain</th>
 								<th>Soil Humidity</th>
@@ -279,7 +272,7 @@ function App() {
 											<tr key={reading.id}>
 												<td>{reading.timestamp && formatTimestampForTable(reading.timestamp)}</td>
 												<td>{reading.humidity}</td>
-												<td>{reading.rain}</td>
+												<td>{reading.rain <= 0 ? 'No rain' : 'Rain'}</td>
 												<td>{reading.soilhum}</td>
 												<td>{reading.soiltemp}</td>
 												<td>{reading.temperature}</td>
