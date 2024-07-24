@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .main-container {
 	max-width: 100%;
 	height: 100%;
@@ -39,7 +43,7 @@ h1 {
 } */
 
 .chart-container {
-	width: 25em;
+	@apply w-[25em] min-h-[15em] max-h-fit;
 }
 
 .line-charts .top,
@@ -73,7 +77,6 @@ h1 {
 
 .button-control {
 	display: flex;
-	column-gap: 1em;
 }
 
 table {
@@ -84,7 +87,6 @@ table {
 .control-panel {
 	display: flex;
 	flex-direction: column;
-	row-gap: 1em;
 }
 
 @media screen and (max-width: 728px) {
