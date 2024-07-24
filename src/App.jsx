@@ -1,5 +1,4 @@
 import { useEffect, useState, Suspense } from 'react';
-import './App.css';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, update } from 'firebase/database';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
@@ -48,7 +47,7 @@ function App() {
 
 	// Fetch and listen for real-time updates from Firebase for MCU control
 	const listenForControlUpdates = () => {
-		const controlRef = ref(database, 'MCU/1Xvvxx57qAUFtrpJucCThDjZbdB2/control');
+		const controlRef = ref(database, 'MCU/outputs/digital');
 		onValue(controlRef, (snapshot) => {
 			if (snapshot.exists()) {
 				setDataMCU(snapshot.val());
@@ -81,7 +80,7 @@ function App() {
 	const toggleControl = async (control) => {
 		try {
 			const updatedValue = dataMCU[control] === 0 ? 1 : 0;
-			const controlRef = ref(database, `MCU/1Xvvxx57qAUFtrpJucCThDjZbdB2/control`);
+			const controlRef = ref(database, `MCU/outputs/digital`);
 			await update(controlRef, {
 				[control]: updatedValue,
 			});
@@ -199,14 +198,14 @@ function App() {
 
 	return (
 		<Suspense fallback={<Spinner />}>
-			<div className='main-container p-4'>
+			<div className='main-container'>
 				<div className='w-[10em] self-center'>
 					<img src='/logo/mikiko.png' alt='' className='w-full h-auto object-contain' />
 				</div>
-				<h1 className='text-3xl font-bold mb-4'>Mikiko Smart Farming</h1>
-				<div className='data grid grid-cols-1 md:grid-cols-1 gap-4'>
-					<div className='line-charts grid gap-4'>
-						<div className='top grid grid-cols-1 md:grid-cols-2 gap-4'>
+				<h1>Mikiko Smart Farming</h1>
+				<div className='data'>
+					<div className='line-charts'>
+						<div className='top'>
 							<div className='chart-container'>
 								<h2 className='text-xl font-semibold'>Temperature</h2>
 								{data.length > 0 ? (
@@ -230,7 +229,7 @@ function App() {
 								)}
 							</div>
 						</div>
-						<div className='bottom grid grid-cols-1 md:grid-cols-2 gap-4'>
+						<div className='bottom'>
 							<div className='chart-container'>
 								<h2 className='text-xl font-semibold'>Humidity</h2>
 								{data.length > 0 ? (
@@ -254,130 +253,148 @@ function App() {
 						</div>
 					</div>
 					<div className='control-panel'>
-						<h2 className='text-xl font-semibold mb-2'>Control Panel</h2>
-						<div className='flex flex-col justify-start gap-y-4'>
-							<div className='button-control grid grid-cols-3 overflow-hidden h-fit gap-x-2 gap-y-2'>
-								<button className='btn btn-primary' onClick={() => toggleControl('pump')}>
-									Pump: {dataMCU.pump === 0 ? 'Off' : 'On'}
-								</button>
-								<button className='btn btn-primary' onClick={() => toggleControl('sprinkler1')}>
-									Sprinkler 1: {dataMCU.sprinkler1 === 0 ? 'Off' : 'On'}
-								</button>
-								<button className='btn btn-primary' onClick={() => toggleControl('sprinkler2')}>
-									Sprinkler 2: {dataMCU.sprinkler2 === 0 ? 'Off' : 'On'}
-								</button>
-								<button className='btn btn-primary' onClick={() => toggleControl('sprinkler3')}>
-									Sprinkler 3: {dataMCU.sprinkler3 === 0 ? 'Off' : 'On'}
-								</button>
-								<button className='btn btn-primary' onClick={() => toggleControl('driptape')}>
-									Drip Tape: {dataMCU.driptape === 0 ? 'Off' : 'On'}
-								</button>
-								<button className='btn btn-primary' onClick={() => toggleControl('fogger')}>
-									Fogger: {dataMCU.fogger === 0 ? 'Off' : 'On'}
-								</button>
-							</div>
-							<form className='grid grid-cols-2 gap-4 flex-1'>
-								<div className='form-control'>
-									<label className='label'>
-										<span className='label-text'>Clock</span>
-									</label>
-									<input
-										type='text'
-										placeholder='Enter clock'
-										className='input input-bordered'
-										value={clock}
-										onChange={(e) => setClock(e.target.value)}
-									/>
-								</div>
-								<div className='form-control'>
-									<label className='label'>
-										<span className='label-text'>Temperature</span>
-									</label>
-									<input
-										type='text'
-										placeholder='Enter temperature'
-										className='input input-bordered'
-										value={temperature}
-										onChange={(e) => setTemperature(e.target.value)}
-									/>
-								</div>
-								<div className='form-control'>
-									<label className='label'>
-										<span className='label-text'>Soil Temperature</span>
-									</label>
-									<input
-										type='text'
-										placeholder='Enter soil temperature'
-										className='input input-bordered'
-										value={soilTemperature}
-										onChange={(e) => setSoilTemperature(e.target.value)}
-									/>
-								</div>
-								<div className='form-control'>
-									<label className='label'>
-										<span className='label-text'>Humidity</span>
-									</label>
-									<input
-										type='text'
-										placeholder='Enter humidity'
-										className='input input-bordered'
-										value={humidity}
-										onChange={(e) => setHumidity(e.target.value)}
-									/>
-								</div>
-								<div className='form-control'>
-									<label className='label'>
-										<span className='label-text'>Soil Humidity</span>
-									</label>
-									<input
-										type='text'
-										placeholder='Enter soil humidity'
-										className='input input-bordered'
-										value={soilHumidity}
-										onChange={(e) => setSoilHumidity(e.target.value)}
-									/>
-								</div>
-							</form>
+						<h2 className=''>Control Panel</h2>
+						<div className='button-control'>
+							<button
+								className='btn btn-primary btn-xs lg:btn-md'
+								onClick={() => toggleControl('5')}
+							>
+								Pump: {dataMCU['5'] === 0 ? 'On' : 'Off'}
+							</button>
+							<button
+								className='btn btn-primary btn-xs lg:btn-md'
+								onClick={() => toggleControl('4')}
+							>
+								Sprinkler 1: {dataMCU['4'] === 0 ? 'On' : 'Off'}
+							</button>
+							<button
+								className='btn btn-primary btn-xs lg:btn-md'
+								onClick={() => toggleControl('0')}
+							>
+								Sprinkler 2: {dataMCU['0'] === 0 ? 'On' : 'Off'}
+							</button>
+							<button
+								className='btn btn-primary btn-xs lg:btn-md'
+								onClick={() => toggleControl('2')}
+							>
+								Sprinkler 3: {dataMCU['2'] === 0 ? 'On' : 'Off'}
+							</button>
+							<button
+								className='btn btn-primary btn-xs lg:btn-md'
+								onClick={() => toggleControl('14')}
+							>
+								Drip Tape: {dataMCU['14'] === 0 ? 'On' : 'Off'}
+							</button>
+							<button
+								className='btn btn-primary btn-xs lg:btn-md'
+								onClick={() => toggleControl('12')}
+							>
+								Fogger: {dataMCU['12'] === 0 ? 'On' : 'Off'}
+							</button>
 						</div>
+						<form className='input-container'>
+							<div className='form-control'>
+								<label className='label'>
+									<span className='label-text'>Clock</span>
+								</label>
+								<input
+									type='text'
+									placeholder='Enter clock'
+									className='input input-bordered input-xs lg:input-md'
+									value={clock}
+									onChange={(e) => setClock(e.target.value)}
+								/>
+							</div>
+							<div className='form-control'>
+								<label className='label'>
+									<span className='label-text'>Temperature</span>
+								</label>
+								<input
+									type='text'
+									placeholder='Enter temperature'
+									className='input input-bordered input-xs lg:input-md'
+									value={temperature}
+									onChange={(e) => setTemperature(e.target.value)}
+								/>
+							</div>
+							<div className='form-control'>
+								<label className='label'>
+									<span className='label-text'>Soil Temperature</span>
+								</label>
+								<input
+									type='text'
+									placeholder='Enter soil temperature'
+									className='input input-bordered  input-xs lg:input-md'
+									value={soilTemperature}
+									onChange={(e) => setSoilTemperature(e.target.value)}
+								/>
+							</div>
+							<div className='form-control'>
+								<label className='label'>
+									<span className='label-text'>Humidity</span>
+								</label>
+								<input
+									type='text'
+									placeholder='Enter humidity'
+									className='input input-bordered  input-xs lg:input-md'
+									value={humidity}
+									onChange={(e) => setHumidity(e.target.value)}
+								/>
+							</div>
+							<div className='form-control'>
+								<label className='label'>
+									<span className='label-text'>Soil Humidity</span>
+								</label>
+								<input
+									type='text'
+									placeholder='Enter soil humidity'
+									className='input input-bordered  input-xs lg:input-md'
+									value={soilHumidity}
+									onChange={(e) => setSoilHumidity(e.target.value)}
+								/>
+							</div>
+						</form>
 					</div>
-					<table className='table table-zebra mt-4'>
-						<thead>
-							<tr>
-								<th>Date</th>
-								<th>Humidity</th>
-								<th>Rain</th>
-								<th>Soil Humidity</th>
-								<th>Soil Temperature</th>
-								<th>Temperature</th>
-							</tr>
-						</thead>
-						<tbody>
-							{Array.isArray(data) && data.length > 0 ? (
-								data.map(
-									(reading) =>
-										reading.timestamp > 1000 && (
-											<tr key={reading.id}>
-												<td>{reading.timestamp && formatTimestampForTable(reading.timestamp)}</td>
-												<td>{reading.humidity}</td>
-												<td>{reading.rain <= 0 ? 'No rain' : 'Rain'}</td>
-												<td>{reading.soilhum}</td>
-												<td>{reading.soiltemp}</td>
-												<td>{reading.temperature}</td>
-											</tr>
-										),
-								)
-							) : (
+					<div className='table-container'>
+						<table className='table-zebra'>
+							<thead>
 								<tr>
-									<td colSpan='6'>
-										{' '}
-										<div className='w-full h-full flex items-center justify-center overflow-hidden'>
-											<span className='loading loading-spinner loading-lg'></span>
-										</div>
-									</td>
+									<th className='px-8'>Date</th>
+									<th className='px-4'>Humidity</th>
+									<th className='px-4'>Rain</th>
+									<th className='px-4'>Soil Humidity</th>
+									<th className='px-4'>Soil Temperature</th>
+									<th className='px-4'>Temperature</th>
 								</tr>
-							)}
-						</tbody>
-					</table>
+							</thead>
+							<tbody>
+								{Array.isArray(data) && data.length > 0 ? (
+									data.map(
+										(reading) =>
+											reading.timestamp > 1000 && (
+												<tr key={reading.id}>
+													<td>{reading.timestamp && formatTimestampForTable(reading.timestamp)}</td>
+													<td>{reading.humidity}</td>
+													<td>{reading.rain <= 0 ? 'No rain' : 'Rain'}</td>
+													<td>{reading.soilhum}</td>
+													<td>{reading.soiltemp}</td>
+													<td>{reading.temperature}</td>
+												</tr>
+											),
+									)
+								) : (
+									<tr>
+										<td colSpan='6'>
+											{' '}
+											<div className='w-full h-full flex items-center justify-center overflow-hidden'>
+												<span className='loading loading-spinner loading-lg'></span>
+											</div>
+										</td>
+									</tr>
+								)}
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 		</Suspense>

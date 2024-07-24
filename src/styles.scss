@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	@apply text-white bg-gray-900;
+	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	font-weight: 400;
+
+	color-scheme: light dark;
+
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+* {
+	@apply m-0 p-0;
+}
+
+@keyframes logo-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	a:nth-of-type(2) .logo {
+		animation: logo-spin infinite 20s linear;
+	}
+}
+
+a {
+	@apply font-medium text-indigo-600 no-underline;
+
+	&:hover {
+		@apply text-indigo-500;
+	}
+}
+button {
+	@apply rounded-lg border border-transparent text-base font-medium bg-gray-800 cursor-pointer transition-colors duration-200;
+
+	&:hover {
+		@apply border-indigo-600;
+	}
+
+	&:focus,
+	&:focus-visible {
+		outline: 4px auto -webkit-focus-ring-color;
+	}
+}
+
+@media (prefers-color-scheme: light) {
+	:root {
+		@apply text-gray-800 bg-white;
+	}
+
+	a:hover {
+		@apply text-indigo-400;
+	}
+
+	button {
+		@apply bg-gray-100;
+	}
+}
+
+body {
+	@apply max-w-[100vw] min-h-[100vh] overflow-y-auto;
+	#root {
+		@apply max-w-full h-full  flex items-center justify-center text-center p-[1em];
+	}
+}
+
+h1 {
+	@apply font-medium text-2xl;
+}
+
+.logo {
+	@apply h-24 p-6 duration-300;
+
+	&:hover {
+		@apply filter drop-shadow-[0_0_2em_#646cffaa];
+	}
+
+	&.react:hover {
+		@apply filter drop-shadow-[0_0_2em_#61dafbaa];
+	}
+}
+
+.main-container {
+	@apply max-w-full flex flex-col gap-y-4 items-center justify-center;
+	.data {
+		@apply flex flex-col items-center justify-center gap-y-4;
+		.top,
+		.bottom {
+			@apply flex flex-col gap-y-8 justify-start lg:flex-row gap-x-8 lg:justify-between;
+		}
+		.chart-container {
+			@apply w-[20em] min-h-[11em] max-h-fit;
+		}
+		.button-control {
+			@apply w-fit grid grid-cols-2 grid-rows-3 lg:grid-rows-1 lg:grid-cols-6 overflow-hidden h-fit gap-x-1 gap-y-1;
+		}
+		.control-panel {
+			@apply w-full items-center justify-start flex flex-col gap-y-4;
+			.input-container {
+				@apply hidden grid grid-cols-2 lg:grid-cols-3 gap-x-2  flex-1;
+			}
+		}
+	}
+}
+
+.table-container {
+	table {
+		@apply w-full text-center text-xs lg:text-lg;
+		th,
+		td {
+			@apply lg:py-2;
+		}
+	}
+	@apply w-[20em] md:w-[30em] lg:w-full overflow-auto;
+}
